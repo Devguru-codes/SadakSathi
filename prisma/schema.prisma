@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String      @id @default(cuid())
+  username     String      @unique
+  fullName     String
+  email        String?     @unique
+  passwordHash String
+  role         String      @default("user")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  complaints   Complaint[]
+  feedback     Feedback[]
+  upvotes      Upvote[]
+}
+
+model Complaint {
+  id               String            @id @default(cuid())
+  userId           String
+  issueType        String
+  description      String
+  street           String
+  city             String
+  state            String
+  zipcode          String
+  latitude         Float?
+  longitude        Float?
+  status           ComplaintStatus   @default(Submitted)
+  remarks          String?
+  isDuplicate      Boolean           @default(false)
+  originalReportId String?
+  evidenceUrl      String?
+  videoUrl         String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  user             User              @relation(fields: [userId], references: [id])
+  detectionResults DetectionResult[]
+  feedback         Feedback[]
+  upvotes          Upvote[]
+}
+
+model Upvote {
+  id          String    @id @default(cuid())
+  complaintId String
+  userId      String
+  createdAt   DateTime  @default(now())
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id          String    @id @default(cuid())
+  complaintId String
+  userId      String
+  rating      Int
+  comment     String?
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model DetectionResult {
+  id          String    @id @default(cuid())
+  complaintId String
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now())
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+}
+
+model ChatThread {
+  id          String        @id @default(cuid())
+  complaintId String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id         String     @id @default(cuid())
+  threadId   String
+  senderId   String
+  senderRole String
+  text       String
+  createdAt  DateTime   @default(now())
+  thread     ChatThread @relation(fields: [threadId], references: [id])
+}
+
+enum ComplaintStatus {
+  Submitted
+  Approved
+  Rejected
+  OnHold
+  Completed
+  ResolvedReviewed
+}
