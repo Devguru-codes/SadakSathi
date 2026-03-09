@@ -1,8 +1,14 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import Link from "next/link";
+import DownloadAppButton from "@/components/app-download/DownloadAppButton";
+import DownloadAppModal from "@/components/app-download/DownloadAppModal";
 
 export default function AppFooter() {
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     return (
+        <>
         <footer className="bg-white pt-24 pb-12 border-t border-border-light">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-16">
@@ -13,6 +19,9 @@ export default function AppFooter() {
                         <p className="text-sm text-text-secondary leading-relaxed max-w-xs" data-pixel-id="g2czq" data-pixel-kind="text">
                             Next-generation road safety platform leveraging Specialized Computer Vision for municipal excellence.
                         </p>
+                        <div className="mt-5">
+                            <DownloadAppButton onClick={() => setShowDownloadModal(true)} />
+                        </div>
                     </div>
                     <div>
                         <h4 className="font-heading font-bold mb-6 text-sm uppercase tracking-widest text-text-primary" data-pixel-id="vkfng" data-pixel-kind="text">Platform</h4>
@@ -49,5 +58,8 @@ export default function AppFooter() {
                 </div>
             </div>
         </footer>
+
+        <DownloadAppModal open={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
+        </>
     );
 }
