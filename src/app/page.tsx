@@ -555,6 +555,57 @@ export default function Home() {
                                     Yes, our system is optimized for dashcam video files. We automatically compensate for vehicle motion, vibrations, and varying light conditions to ensure consistent detection.
                                 </div>
                             </div>
+                            <div className="border border-border-light rounded-xl overflow-hidden">
+                                <button className="w-full p-6 text-left flex justify-between items-center bg-white hover:bg-neutral-surface transition-colors"
+                                    onClick={(e) => {
+                                        const content = e.currentTarget.nextElementSibling;
+                                        if (content) {
+                                            content.classList.toggle('hidden');
+                                            e.currentTarget.querySelector('svg')?.classList.toggle('rotate-180')
+                                        }
+                                    }}
+                                >
+                                    <span className="font-semibold">Who manages the Municipal Dashboard?</span>
+                                    <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div className="hidden p-6 bg-white border-t border-border-light text-text-secondary leading-relaxed">
+                                    The Municipal Dashboard is designed for city administrators, traffic police, and infrastructure engineers to monitor road conditions and traffic violations in real-time, prioritize repairs, and issue automated challans.
+                                </div>
+                            </div>
+                            <div className="border border-border-light rounded-xl overflow-hidden">
+                                <button className="w-full p-6 text-left flex justify-between items-center bg-white hover:bg-neutral-surface transition-colors"
+                                    onClick={(e) => {
+                                        const content = e.currentTarget.nextElementSibling;
+                                        if (content) {
+                                            content.classList.toggle('hidden');
+                                            e.currentTarget.querySelector('svg')?.classList.toggle('rotate-180')
+                                        }
+                                    }}
+                                >
+                                    <span className="font-semibold">Is citizen data kept private?</span>
+                                    <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div className="hidden p-6 bg-white border-t border-border-light text-text-secondary leading-relaxed">
+                                    Absolutely. We prioritize privacy by ensuring that all user uploads and reports are anonymized, stripping out personally identifiable information before forwarding actionable intelligence to municipal authorities.
+                                </div>
+                            </div>
+                            <div className="border border-border-light rounded-xl overflow-hidden">
+                                <button className="w-full p-6 text-left flex justify-between items-center bg-white hover:bg-neutral-surface transition-colors"
+                                    onClick={(e) => {
+                                        const content = e.currentTarget.nextElementSibling;
+                                        if (content) {
+                                            content.classList.toggle('hidden');
+                                            e.currentTarget.querySelector('svg')?.classList.toggle('rotate-180')
+                                        }
+                                    }}
+                                >
+                                    <span className="font-semibold">Can the AI models detect violations at night?</span>
+                                    <svg className="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div className="hidden p-6 bg-white border-t border-border-light text-text-secondary leading-relaxed">
+                                    Yes, our models are trained on diverse conditions and work effectively in low-light environments, provided your camera or dashcam has sufficient night-vision capabilities or there is ambient street lighting.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
