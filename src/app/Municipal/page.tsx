@@ -33,7 +33,7 @@ export default function UserDashboardPage() {
                     <aside className="w-64 bg-text-primary text-white hidden lg:flex flex-col fixed inset-y-0 left-0 z-[60]">
                         <div className="p-6 border-b border-white/10">
                             <div className="text-xl font-heading font-bold flex items-center gap-2">
-                                <span className="text-2xl">🛣️</span> PotholeVision
+                                <span className="text-2xl">🛣️</span> SadakSathi
                             </div>
                         </div>
                         <nav className="flex-grow p-4 space-y-1">
@@ -59,7 +59,7 @@ export default function UserDashboardPage() {
                                 <div className="w-8 h-8 rounded-full bg-brand-primary"></div>
                                 <div className="min-w-0">
                                     <div className="text-xs font-bold truncate">Municipal User</div>
-                                    <div className="text-[10px] opacity-60 truncate">Municipal@potholevision.ai</div>
+                                    <div className="text-[10px] opacity-60 truncate">Municipal@SadakSathi.ai</div>
                                 </div>
                             </div>
                         </div>

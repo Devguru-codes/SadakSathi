@@ -96,7 +96,7 @@ export default function Home() {
                                             <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-green-500"></div>
                                         </div>
                                         <div className="flex-1 bg-gray-700 rounded px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-xs text-gray-300 font-mono truncate">
-                                            potholevision.ai/app/detection
+                                            SadakSathi.ai/app/detection
                                         </div>
                                     </div>
 
@@ -386,7 +386,7 @@ export default function Home() {
                     </div>
                     <div className="flex gap-6 animate-marquee whitespace-nowrap" style={{ width: "fit-content" }}>
                         <div className="w-96 bg-white/10 backdrop-blur p-8 rounded-2xl whitespace-normal border border-white/10">
-                            <p className="text-lg mb-6 leading-relaxed italic">&quot;PotholeVision reduced our survey time by 80%. We can now cover the entire city grid in a single weekend instead of three months.&quot;</p>
+                            <p className="text-lg mb-6 leading-relaxed italic">&quot;SadakSathi reduced our survey time by 80%. We can now cover the entire city grid in a single weekend instead of three months.&quot;</p>
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-brand-primary rounded-full"></div>
                                 <div>
@@ -417,7 +417,7 @@ export default function Home() {
                         </div>
                         {/* Duplicates for marquee effect */}
                         <div className="w-96 bg-white/10 backdrop-blur p-8 rounded-2xl whitespace-normal border border-white/10">
-                            <p className="text-lg mb-6 leading-relaxed italic">&quot;PotholeVision reduced our survey time by 80%. We can now cover the entire city grid in a single weekend instead of three months.&quot;</p>
+                            <p className="text-lg mb-6 leading-relaxed italic">&quot;SadakSathi reduced our survey time by 80%. We can now cover the entire city grid in a single weekend instead of three months.&quot;</p>
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-brand-primary rounded-full"></div>
                                 <div>

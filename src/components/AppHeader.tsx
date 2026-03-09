@@ -45,7 +45,7 @@ export default function AppHeader({ dashboardMode = false }: AppHeaderProps) {
         <header className={`fixed top-0 right-0 z-50 py-3 bg-white border-b border-border-light transition-all ${dashboardMode ? 'w-full lg:w-[calc(100%-16rem)]' : 'w-full left-0'}`}>
             <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                 <Link href="/" className={`text-xl font-heading font-bold text-text-primary items-center gap-2 ${dashboardMode ? 'hidden lg:flex opacity-0 pointer-events-none' : 'flex'}`}>
-                    <span className="text-2xl">🛣️</span> PotholeVision
+                    <span className="text-2xl">🛣️</span> SadakSathi
                 </Link>
 
                 <div className="hidden md:flex items-center gap-1">

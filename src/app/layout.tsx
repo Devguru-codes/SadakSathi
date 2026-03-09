@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "PotholeVision | AI-Powered Pothole Detection System",
-    description: "Advanced AI system for real-time pothole detection. Upload images or videos for instant severity mapping and geolocation.",
+    title: "SadakSathi | AI-Powered Road Intelligence for Smart Cities",
+    description: "SadakSathi — Detect potholes and traffic violations with AI. Real-time monitoring, geo-tagging, automated reports, and smart enforcement tools for modern urban governance.",
 };
 
 export default function RootLayout({

@@ -121,7 +121,7 @@ export default function AuthPage() {
                         <div className={`max-w-md w-full animate-on-scroll-hidden ${isVisible ? 'animate-on-scroll-visible' : ''}`}>
                             <div className="mb-10 text-center md:text-left">
                                 <Link href="/" className="inline-flex items-center gap-2 mb-6 font-heading font-bold text-2xl hover:opacity-80 transition-opacity">
-                                    <span>🛣️</span> PotholeVision
+                                    <span>🛣️</span> SadakSathi
                                 </Link>
                                 <h1 className="text-3xl font-heading font-bold text-text-primary mb-2">Welcome Back</h1>
                                 <p className="text-text-secondary">Sign in to your account to continue</p>
@@ -185,8 +185,8 @@ export default function AuthPage() {
                                         <label className="text-xs font-bold uppercase text-text-secondary tracking-wider">Role</label>
                                         <select className="w-full px-4 py-3 rounded-lg border border-border-light bg-white focus:ring-2 focus:ring-brand-primary outline-none appearance-none" value={role} onChange={(e) => setRole(e.target.value)}>
                                             <option>Citizen Contributor</option>
-                                            <option>City Administrator</option>
-                                            <option>Maintenance Contractor</option>
+                                            <option>Municipal Administrator</option>
+                                            <option>Traffic Department</option>
                                         </select>
                                     </div>
                                     <div className="space-y-2">

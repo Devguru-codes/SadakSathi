@@ -101,3 +101,48 @@ enum ComplaintStatus {
   Completed
   ResolvedReviewed
 }
+
+enum ViolationType {
+  helmet_violation
+  triple_riding
+  wrong_side
+  plate_detection
+}
+
+enum ChallanStatus {
+  Issued
+  Paid
+  Disputed
+  Cancelled
+}
+
+model VehicleDetection {
+  id          String             @id @default(cuid())
+  frameId     String
+  vehicleType String
+  confidence  Float
+  timestamp   DateTime           @default(now())
+  violations  TrafficViolation[]
+}
+
+model TrafficViolation {
+  id         String           @id @default(cuid())
+  type       ViolationType
+  confidence Float
+  frameId    String
+  vehicleId  String
+  location   String?
+  status     String           @default("detected")
+  timestamp  DateTime         @default(now())
+  vehicle    VehicleDetection @relation(fields: [vehicleId], references: [id])
+  challan    Challan?
+}
+
+model Challan {
+  id          String           @id @default(cuid())
+  violationId String           @unique
+  amount      Float
+  issuedAt    DateTime         @default(now())
+  status      ChallanStatus    @default(Issued)
+  violation   TrafficViolation @relation(fields: [violationId], references: [id])
+}
