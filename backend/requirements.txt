@@ -8,6 +8,7 @@ uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9        # File upload support
 
 # --- Settings / Env ---
+pydantic>=2.7.0
 pydantic-settings>=2.2.0
 python-dotenv>=1.0.0
 
@@ -31,4 +32,3 @@ xgboost>=2.0.0                 # Duplicate classifier
 geopy>=2.4.0                   # Geo-distance calculations
 
 # --- Utilities ---
-scipy>=1.12.0
