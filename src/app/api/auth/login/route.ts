@@ -45,7 +45,7 @@ export async function POST(req: Request) {
             
             response.cookies.set('auth_token', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_APP_URL?.startsWith('https'),
                 sameSite: 'lax',
                 maxAge: 60 * 60 * 24 * 7, // 7 days
                 path: '/',
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         const response = NextResponse.json({ message: 'Login successful' }, { status: 200 });
         response.cookies.set('auth_token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_APP_URL?.startsWith('https'),
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7, // 7 days
             path: '/',
