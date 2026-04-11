@@ -258,16 +258,16 @@ Concept imported from a prior project. Core idea:
            │                          │ HTTP (planned)
            ▼                          ▼
 ┌──────────────────┐    ┌──────────────────────────────────┐
-│   PostgreSQL DB   │    │     FASTAPI BACKEND (Planned)     │
-│   (via Prisma)    │    │  /detect  /duplicate-check        │
-│                   │    │  /traffic/analyze                  │
-│  Users            │    │  YOLO models served via            │
-│  Complaints       │    │  Ultralytics / ONNX Runtime        │
-│  Upvotes          │    │                                    │
-│  Feedback         │    │  Duplication Detection Engine       │
-│  DetectionResults │    │  (Geo + Image Similarity)           │
-│  ChatThreads      │    └──────────────────────────────────┘
-│  VehicleDetections│
+│   PostgreSQL DB   │    │     FASTAPI BACKEND (Active)     │
+│   (via Prisma)    │    │  /detect/image                   │
+│                   │    │  /detect/traffic/image           │
+│  Users            │    │  /duplicate/check                │
+│  Complaints       │    │  YOLO models served via          │
+│  Upvotes          │    │  Ultralytics / ONNX Runtime      │
+│  Feedback         │    │                                  │
+│  DetectionResults │    │  Duplication Detection Engine    │
+│  ChatThreads      │    │  (Geo + Image Similarity)        │
+│  VehicleDetections│    └──────────────────────────────────┘
 │  TrafficViolations│
 │  Challans         │
 └──────────────────┘
@@ -291,16 +291,16 @@ Concept imported from a prior project. Core idea:
 ## 12. Future Scope
 
 ### Short Term (Current Sprint)
-- [ ] Build FastAPI backend with `/detect` endpoint (accepts image, returns detection results)
-- [ ] Integrate YOLO models for pothole, manhole, garbage, fallen tree detection
-- [ ] Implement duplication detection system (geo + image similarity)
+- [x] Build FastAPI backend with `/detect` endpoint (accepts image, returns detection results)
+- [x] Integrate YOLO models for pothole, manhole, garbage, fallen tree detection
+- [x] Implement duplication detection system (geo + image similarity)
 - [ ] Connect Next.js upload flow to FastAPI for real ML inference
 - [ ] Wire up the complaint submission modal to actually POST data to the backend
 
 ### Medium Term
 - [ ] Build admin dashboard (currently a stub) for complaint management
 - [ ] Add real-time chat API (currently `ChatThread`/`ChatMessage` models exist but no API routes)
-- [ ] Implement traffic violation ML pipeline (replace mock upload endpoint)
+- [x] Implement traffic violation ML pipeline (replace mock upload endpoint)
 - [ ] Add file storage (S3/Cloudinary) instead of base64 avatar storage
 - [ ] Add pagination to feed endpoint
 - [ ] Build unified detector page (currently a stub)

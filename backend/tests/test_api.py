@@ -43,7 +43,7 @@ def test_detect_image_validation_error(client):
 
 def test_traffic_detect_image_validation_error(client):
     """Test traffic detection endpoint payload validation (missing file)."""
-    response = client.post("/traffic/analyze/image")
+    response = client.post("/detect/traffic/image")
     assert response.status_code == 422
 
 def test_traffic_detection_with_actual_image(client):
@@ -60,7 +60,7 @@ def test_traffic_detection_with_actual_image(client):
     with open(image_path, "rb") as f:
         # We need to send it as multipart form-data
         response = client.post(
-            "/traffic/analyze/image",
+            "/detect/traffic/image",
             files={"file": ("road_safety_2.jpg", f, "image/jpeg")},
             data={"conf_threshold": "0.25"}
         )
