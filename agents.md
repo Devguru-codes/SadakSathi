@@ -290,6 +290,8 @@ Concept imported from a prior project. Core idea:
 
 ## 12. Future Scope
 
+> **Origin Note:** SadakSathi is an evolution of a prior project, [eNivaran](https://github.com/Devguru-codes/eNivaran). While eNivaran heavily focused strictly on pothole detection, SadakSathi expansively broadens the safety scope to all road hazards and traffic violations. We intend to import and refine several of eNivaran's most advanced features as listed below.
+
 ### Short Term (Current Sprint)
 - [x] Build FastAPI backend with `/detect` endpoint (accepts image, returns detection results)
 - [x] Integrate YOLO models for pothole, manhole, garbage, fallen tree detection
@@ -308,10 +310,13 @@ Concept imported from a prior project. Core idea:
 ### Long Term
 - [ ] Mobile app (React Native or Flutter) for on-the-go reporting
 - [ ] Real-time notifications (WebSocket/SSE) for complaint status changes
-- [ ] Heatmap visualization of road issues by geography
+- [ ] **Interactive India Heatmap:** A visual geographic heatmap plotting complaint clusters across India, dynamically accessible.
+- [ ] **Advanced Admin Hierarchy:** Implement distinct "Normal Admin" (status updates, basic dashboard) and "Higher Admin" tiers (advanced analytics, sentiment analysis donuts, supervisor oversight).
+- [ ] **AI Chatbot Assistant:** Embed a Gemini-powered context-aware assistant (akin to eNivaran's JARVIS) to help citizens navigate the portal and automatically summarize cases.
+- [ ] **Accessibility & Speech-to-Text:** Expand multi-language support (Hindi, regional languages) equipped with automated speech-to-text and offline translations (e.g., Argos Translate).
+- [ ] **Street-View Integration:** Implement an "Admin Inspector" tool integrating street-level imagery (e.g., KartaView) for unified, remote visual road assessments.
 - [ ] Integration with municipal APIs for automated work order creation
 - [ ] Analytics and reporting dashboards for city administrators
-- [ ] Multi-language support (Hindi, regional languages)
 
 ---
 

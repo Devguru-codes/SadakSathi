@@ -18,21 +18,6 @@ class BoundingBox(BaseModel):
     x2: int
     y2: int
 
-class TrafficDetectionResult(BaseModel):
-    """A traffic violation detected in an image."""
-    id: int
-    class_name: str
-    confidence: float
-    bbox: BoundingBox
-    plate_text: str | None = None
-
-class TrafficAssessmentResponse(BaseModel):
-    """Response from /traffic/analyze/image endpoint."""
-    success: bool = True
-    total_detections: int
-    detections: list[TrafficDetectionResult]
-    annotated_image_base64: str | None = None
-    message: str = ""
 
 # ─────────────────────────────────────────────
 #  Road Hazard Detection
