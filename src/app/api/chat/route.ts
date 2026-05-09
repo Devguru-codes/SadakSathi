@@ -35,14 +35,14 @@ export async function GET(req: NextRequest) {
             if (!thread) return NextResponse.json({ message: 'Thread not found' }, { status: 404 });
             
             // Security check
-            if (user.role === 'user' && thread.userId !== user.id) {
+            if (user.role !== 'municipal' && user.role !== 'traffic' && thread.userId !== user.id) {
                 return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
             }
             return NextResponse.json({ messages: thread.messages });
         }
 
         // Return threads based on role
-        if (user.role === 'user') {
+        if (user.role !== 'municipal' && user.role !== 'traffic') {
             if (!department) return NextResponse.json({ message: 'Department required' }, { status: 400 });
             
             // For a citizen, they only have 1 main thread per department (general chat).
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Security check
-        if (user.role === 'user' && thread.userId !== user.id) {
+        if (user.role !== 'municipal' && user.role !== 'traffic' && thread.userId !== user.id) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 403 });
         }
 

@@ -119,10 +119,10 @@ function Sidebar({ onLogout }: { onLogout: () => void }) {
 // ─── Feature Cards ─────────────────────────────────────────────────────────────
 
 const FEATURES = [
-    { icon: '🪖', title: 'No Helmet Detection', desc: 'Identify riders without helmets instantly using high-precision headwear detection models.' },
-    { icon: '👨‍👩‍👦', title: 'Triple Riding Detection', desc: 'Detect unsafe multi-passenger riding patterns on two-wheelers automatically.' },
-    { icon: '🔄', title: 'Wrong Side Driving', desc: 'Identify vehicles moving against traffic flow to prevent potential collisions in real-time.' },
-    { icon: '🔢', title: 'Automatic License Plate Detection', desc: 'Extract license plate details using AI OCR for automated e-challan generation.' },
+    { icon: '🛵', title: 'No Helmet Detection', desc: 'Identify riders without helmets instantly using high-precision headwear detection models.' },
+    { icon: '🚦', title: 'Triple Riding Detection', desc: 'Detect unsafe multi-passenger riding patterns on two-wheelers automatically.' },
+    { icon: '⛔', title: 'Wrong Side Driving', desc: 'Identify vehicles moving against traffic flow to prevent potential collisions in real-time.' },
+    { icon: '📷', title: 'Automatic License Plate Detection', desc: 'Extract license plate details using AI OCR for automated e-challan generation.' },
 ];
 
 // ─── Main Page ────────────────────────────────────────────────────────────────

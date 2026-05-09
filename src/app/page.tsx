@@ -245,7 +245,7 @@ export default function Home() {
                             {/* Card 1 */}
                             <div className="bg-white p-8 rounded-3xl shadow-soft hover:-translate-y-2 transition-all group" data-animation-on-scroll="">
                                 <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors" data-pixel-id="kvwoa" data-pixel-kind="text">
-                                    <span className="text-2xl">🪖</span>
+                                    <span className="text-2xl">🛵</span>
                                 </div>
                                 <h3 className="text-2xl font-heading font-bold mb-3" data-pixel-id="8xkj9" data-pixel-kind="text">No Helmet Detection</h3>
                                 <p className="text-text-secondary leading-relaxed" data-pixel-id="wfbba" data-pixel-kind="text">Identify riders without helmets instantly using high-precision headwear detection models.</p>
@@ -253,7 +253,7 @@ export default function Home() {
                             {/* Card 2 */}
                             <div className="bg-white p-8 rounded-3xl shadow-soft hover:-translate-y-2 transition-all group" data-animation-on-scroll="">
                                 <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors" data-pixel-id="6868w" data-pixel-kind="text">
-                                    <span className="text-2xl">👨‍👩‍👦</span>
+                                    <span className="text-2xl">🚦</span>
                                 </div>
                                 <h3 className="text-2xl font-heading font-bold mb-3" data-pixel-id="r1nsq" data-pixel-kind="text">Triple Riding Detection</h3>
                                 <p className="text-text-secondary leading-relaxed" data-pixel-id="cx0cn" data-pixel-kind="text">Detect unsafe multi-passenger riding patterns on two-wheelers automatically.</p>
@@ -261,7 +261,7 @@ export default function Home() {
                             {/* Card 3 */}
                             <div className="bg-white p-8 rounded-3xl shadow-soft hover:-translate-y-2 transition-all group" data-animation-on-scroll="">
                                 <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors" data-pixel-id="gv5ra" data-pixel-kind="text">
-                                    <span className="text-2xl">🔄</span>
+                                    <span className="text-2xl">⛔</span>
                                 </div>
                                 <h3 className="text-2xl font-heading font-bold mb-3" data-pixel-id="prals" data-pixel-kind="text">Wrong Side Driving</h3>
                                 <p className="text-text-secondary leading-relaxed" data-pixel-id="h3c7i" data-pixel-kind="text">Identify vehicles moving against traffic flow to prevent potential collisions in real-time.</p>
@@ -269,7 +269,7 @@ export default function Home() {
                             {/* Card 4 */}
                             <div className="bg-white p-8 rounded-3xl shadow-soft hover:-translate-y-2 transition-all group" data-animation-on-scroll="">
                                 <div className="w-12 h-12 bg-brand-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors" data-pixel-id="e16vc" data-pixel-kind="text">
-                                    <span className="text-2xl">🔢</span>
+                                    <span className="text-2xl">📷</span>
                                 </div>
                                 <h3 className="text-2xl font-heading font-bold mb-3" data-pixel-id="mn5l2" data-pixel-kind="text">Automatic License Plate Detection</h3>
                                 <p className="text-text-secondary leading-relaxed" data-pixel-id="drfis" data-pixel-kind="text">Extract license plate details using powerful AI OCR models for automated e-challan generation.</p>

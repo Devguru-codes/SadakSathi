@@ -113,6 +113,7 @@ export default function AppHeader({ dashboardMode = false }: AppHeaderProps) {
 
                 {/* Desktop right-side actions */}
                 <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                    <LanguageSwitcher />
                     <DownloadAppButton onClick={() => setShowDownloadModal(true)} compact />
                     {!isLoading && isLoggedIn ? (
                         <>
