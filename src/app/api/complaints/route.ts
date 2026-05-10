@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
+import { checkAndFlagDuplicate } from '@/lib/duplicateDetection';
 
 export async function POST(req: NextRequest) {
     try {
@@ -47,16 +48,40 @@ export async function POST(req: NextRequest) {
             },
         });
 
+        // ── Automatic duplicate detection ──────────────────────────────────
+        // Run geo-proximity check against recent complaints of the same type.
+        // This updates the DB record in-place if a duplicate is found.
+        const parsedLat = latitude  ? parseFloat(latitude)  : null;
+        const parsedLng = longitude ? parseFloat(longitude) : null;
+
+        const duplicateOfId = await checkAndFlagDuplicate(
+            complaint.id,
+            issueType,
+            parsedLat,
+            parsedLng,
+        );
+        // ─────────────────────────────────────────────────────────────────────
+
         // Log activity
         await prisma.userActivity.create({
             data: {
                 userId,
                 action: 'complaint_submitted',
-                details: `Submitted complaint #${complaint.id} for ${issueType}`,
+                details: duplicateOfId
+                    ? `Submitted complaint #${complaint.id} for ${issueType} — auto-flagged as duplicate of #${duplicateOfId}`
+                    : `Submitted complaint #${complaint.id} for ${issueType}`,
             },
         });
 
-        return NextResponse.json({ success: true, complaintId: complaint.id }, { status: 201 });
+        return NextResponse.json(
+            {
+                success: true,
+                complaintId:  complaint.id,
+                isDuplicate:  !!duplicateOfId,
+                duplicateOf:  duplicateOfId ?? null,
+            },
+            { status: 201 },
+        );
     } catch (error) {
         console.error('Error creating complaint:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
