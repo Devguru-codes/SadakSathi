@@ -255,6 +255,7 @@ function ComplaintsPageInner() {
       const videoUrl    = mediaType === "video" ? mediaPreview : null;
       const res = await fetch("/api/complaints", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ issueType, description, street, city, state, zipcode, latitude, longitude, evidenceUrl, videoUrl }),
       });

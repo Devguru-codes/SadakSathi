@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
             // Generate JWT token with authority role
             const token = await signToken({ 
-                userId: `${credentials.role}-user`, 
+                id: `${credentials.role}-user`, 
                 role: credentials.role,
                 username: credentials.username,
                 authorityType: credentials.role
