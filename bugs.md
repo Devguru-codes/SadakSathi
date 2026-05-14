@@ -1,8 +1,8 @@
 # 🐛 SadakSathi — Bug Report
 
-> **Audit Date:** 2026-04-11
-> **Auditor:** @devgu + Antigravity
-> **Scope:** Full-stack audit — Next.js frontend, FastAPI backend, CI/CD, auth, ML pipeline
+> **Audit Date:** 2026-05-15  
+> **Auditor:** @devgu + Antigravity  
+> **Scope:** Full-stack audit — Next.js frontend, FastAPI backend, CI/CD, auth, ML pipeline, duplication engine
 
 ---
 
@@ -617,6 +617,46 @@ This code runs at module import time — every time any module imports from `con
 
 ---
 
+### ~~BUG-047: Duplication Grid Index Built But Never Used for Lookup~~ ✅ FIXED
+
+**File:** `backend/ml/duplication.py` (lines 260-267, 401)
+
+**Problem:** `_location_to_grid()` computes coarse grid cells for geo-proximity lookup, and `add_report()` stores reports in `self._grid_index`. However, `find_duplicates()` iterated over **all** `self.reports_db` sequentially instead of using the grid index for O(1) candidate retrieval.
+
+**Fix:** Added `_get_neighbor_indices()` method that retrieves candidates from the target grid cell AND its 8 neighbors (3×3 block). Replaced the O(n) `for idx, report in enumerate(self.reports_db)` with `for idx in candidate_indices`. Validated with 100-report test suite (100% pass rate preserved).
+
+---
+
+### ~~BUG-048: EasyOCR Pulls In Heavy Rust Build Dependencies~~ ✅ FIXED
+
+**File:** `backend/requirements.txt`
+
+**Problem:** EasyOCR transitively depended on `python-bidi`, which since v0.6.0 requires a Rust toolchain. On CI without Rust pre-installed, `pip install easyocr` failed with a maturin build error.
+
+**Fix:** Replaced EasyOCR with Florence-2-base VLM (`microsoft/Florence-2-base`, 0.23B params, ~460MB) in `ml/plate_ocr.py`. Florence-2 uses the `<OCR>` task prompt on YOLO-cropped plate regions. Achieves 75%+ accuracy on Indian plates vs 13% for fast-plate-ocr alternatives. Dependencies: `einops`, `timm`, `sentencepiece` (no Rust required). See `ml/plate_ocr.py` and `ml/traffic.py`.
+
+---
+
+### ~~BUG-049: Silent Exception Swallowing in `find_duplicates` Comparison Loop~~ ✅ FIXED
+
+**File:** `backend/ml/duplication.py` (lines 423-425)
+
+**Problem:** The inner comparison loop caught **all** exceptions and silently continued with only a WARNING-level log containing no report identifier.
+
+**Fix:** Split exception handling into two tiers: (1) Expected failures (`ValueError`, `TypeError`, `IndexError`) logged at WARNING with the report's `id` field. (2) Unexpected exceptions logged at ERROR level with `exc_info=True` (full traceback) and the report's `id`. This makes debugging failed comparisons straightforward.
+
+---
+
+### ~~BUG-050: `requirements.txt` Missing `starlette` Explicit Dependency~~ ✅ FIXED
+
+**File:** `backend/requirements.txt`
+
+**Problem:** FastAPI depends on Starlette, but `starlette` was not listed in `requirements.txt`. Clean venv installs could fail.
+
+**Fix:** Added `starlette>=0.37.0` to `requirements.txt`.
+
+---
+
 ---
 
 ## Summary
@@ -625,9 +665,9 @@ This code runs at module import time — every time any module imports from `con
 |----------|-------|
 | 🔴 CRITICAL | 3 |
 | 🟠 HIGH | 8 (3 fixed) |
-| 🟡 MEDIUM | 9 + 11 new = 20 |
-| 🟢 LOW | 6 (5 fixed) + 9 new = 10 |
-| **Total** | **46** |
+| 🟡 MEDIUM | 20 (7 fixed) |
+| 🟢 LOW | 15 (9 fixed) |
+| **Total** | **50** (19 fixed, 31 open) |
 
 ### Priority Fix Order
 

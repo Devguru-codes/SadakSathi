@@ -7,6 +7,7 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
+starlette>=0.37.0
 
 # --- Settings / Env ---
 pydantic>=2.7.0
@@ -35,5 +36,7 @@ python-bidi==0.4.2
 sentence-transformers>=3.0.0
 scikit-learn>=1.4.0
 
-# NOTE: easyocr excluded — pulls python-bidi>=0.6 which requires Rust on Render.
-# OCR gracefully disabled via OCR_ENABLED=False in config.py
+# --- Plate OCR (Florence-2, replaces EasyOCR) ---
+einops>=0.8.0
+timm>=1.0.0
+sentencepiece>=0.2.0

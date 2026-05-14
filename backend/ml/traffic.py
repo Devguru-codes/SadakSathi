@@ -3,7 +3,7 @@ SadakSathi — Traffic Violation Detection Module
 
 Handles detection of traffic-related violations using YOLO:
   • Helmet / No Helmet detection
-  • Number Plate detection with EasyOCR text reading
+  • Number Plate detection with Florence-2 OCR text reading
   • Triple Riding detection
   • Wrong Side Moving detection
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────
 
 _global_traffic_model = None
-_global_ocr_reader = None
+_florence_ocr_loaded = False  # Florence-2 replaces EasyOCR
 
 
 # ─────────────────────────────────────────────
@@ -117,36 +117,36 @@ def get_traffic_model():
     return _global_traffic_model
 
 
-def load_ocr_reader(languages: list[str] | None = None):
+def load_ocr_reader(**kwargs):
     """
-    Initialize EasyOCR reader for number plate text extraction.
-    Called at startup; the reader is reused for all subsequent OCR calls.
+    Initialize Florence-2 for number plate text extraction.
+    Replaces the previous EasyOCR reader.
+    Called at startup; the model is reused for all subsequent OCR calls.
+
+    Accepts keyword args forwarded to ml.plate_ocr.load_plate_ocr():
+      model_id: str  (default: "microsoft/Florence-2-base")
+      device:   str  (default: "auto")
     """
-    global _global_ocr_reader
+    global _florence_ocr_loaded
 
-    if _global_ocr_reader is not None:
-        return _global_ocr_reader
-
-    if languages is None:
-        languages = ["en"]
+    if _florence_ocr_loaded:
+        return True
 
     try:
-        import easyocr
+        from ml.plate_ocr import load_plate_ocr
 
-        logger.info(f"Initializing EasyOCR with languages: {languages}")
-        _global_ocr_reader = easyocr.Reader(languages, gpu=torch.cuda.is_available())
-        logger.info("✅ EasyOCR initialized successfully.")
-        return _global_ocr_reader
+        _florence_ocr_loaded = load_plate_ocr(**kwargs)
+        return _florence_ocr_loaded
 
     except Exception as e:
-        logger.error(f"Failed to initialize EasyOCR: {e}", exc_info=True)
+        logger.error(f"Failed to initialize Florence-2 OCR: {e}", exc_info=True)
         # OCR failure is non-fatal — detections work without plate text
-        return None
+        return False
 
 
 def get_ocr_reader():
-    """Return the global EasyOCR reader instance."""
-    return _global_ocr_reader
+    """Return whether the plate OCR engine is loaded."""
+    return _florence_ocr_loaded
 
 
 def get_traffic_device() -> str:
@@ -183,7 +183,7 @@ def is_plate_class(raw_name: str) -> bool:
 
 def read_plate_text(image: np.ndarray, bbox: dict) -> str | None:
     """
-    Crop the number plate region from an image and run EasyOCR on it.
+    Crop the number plate region from an image and run Florence-2 OCR on it.
 
     Args:
         image: Full BGR frame.
@@ -192,37 +192,12 @@ def read_plate_text(image: np.ndarray, bbox: dict) -> str | None:
     Returns:
         Uppercase plate text string, or None if OCR unavailable/failed.
     """
-    reader = _global_ocr_reader
-    if reader is None:
+    if not _florence_ocr_loaded:
         return None
 
     try:
-        pad = 6
-        h, w = image.shape[:2]
-        x1 = max(0, bbox["x1"] - pad)
-        y1 = max(0, bbox["y1"] - pad)
-        x2 = min(w, bbox["x2"] + pad)
-        y2 = min(h, bbox["y2"] + pad)
-
-        crop = image[y1:y2, x1:x2]
-        if crop.size == 0:
-            return None
-
-        # Upscale small crops for better OCR accuracy
-        ch, cw = crop.shape[:2]
-        if cw < 100:
-            scale = max(2, 100 // cw)
-            crop = cv2.resize(crop, (cw * scale, ch * scale), interpolation=cv2.INTER_CUBIC)
-
-        # Grayscale + mild sharpening helps plate OCR
-        gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-        gray = cv2.bilateralFilter(gray, 9, 75, 75)
-        _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-        ocr_results = reader.readtext(thresh, detail=0, paragraph=True)
-        text = " ".join(ocr_results).strip().upper()
-        return text if text else None
-
+        from ml.plate_ocr import read_plate_text as _florence_read
+        return _florence_read(image, bbox)
     except Exception as e:
         logger.warning(f"OCR failed for plate crop: {e}")
         return None

@@ -266,6 +266,22 @@ class CivicIssueDuplicateDetector:
         except Exception:
             return (0, 0)
 
+    def _get_neighbor_indices(self, location: list[float]) -> list[int]:
+        """
+        Retrieve candidate report indices from the grid index.
+
+        Returns all indices stored in the target grid cell AND its 8
+        neighbors (3×3 block).  This gives O(1) amortised candidate
+        retrieval instead of the previous O(n) full scan.
+        """
+        cell = self._location_to_grid(location)
+        candidates: list[int] = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                key = (cell[0] + dx, cell[1] + dy)
+                candidates.extend(self.location_grid.get(key, []))
+        return candidates
+
     def add_report(self, report: dict) -> int | None:
         """
         Add a report to the in-memory index.
@@ -398,7 +414,11 @@ class CivicIssueDuplicateDetector:
 
             matches: list[tuple[dict, float, dict]] = []   # (report, combined_score, breakdown)
 
-            for idx, report in enumerate(self.reports_db):
+            # Use grid index for O(1) candidate retrieval instead of O(n) full scan
+            candidate_indices = self._get_neighbor_indices(new_loc)
+
+            for idx in candidate_indices:
+                report = self.reports_db[idx]
                 try:
                     # Gate 1: Issue type must match
                     if report.get("issue_type") != new_type:
@@ -420,8 +440,19 @@ class CivicIssueDuplicateDetector:
                         breakdown = self._signal_explanation(image_score, text_score, location_score, combined)
                         matches.append((report, combined, breakdown))
 
+                except (ValueError, TypeError, IndexError) as e:
+                    report_id = report.get('id', f'idx={idx}')
+                    logger.warning(
+                        f"Comparison error with report {report_id}: {type(e).__name__}: {e}"
+                    )
+                    continue
                 except Exception as e:
-                    logger.warning(f"Comparison error with report {idx}: {e}")
+                    report_id = report.get('id', f'idx={idx}')
+                    logger.error(
+                        f"Unexpected error comparing with report {report_id}: "
+                        f"{type(e).__name__}: {e}",
+                        exc_info=True,
+                    )
                     continue
 
             # Sort by confidence descending

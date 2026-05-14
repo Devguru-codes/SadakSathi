@@ -1,8 +1,8 @@
 # 🛣️ SadakSathi — Project Intelligence Document
 
-> **Last Updated:** 2026-03-09  
+> **Last Updated:** 2026-05-15  
 > **Lead Developer:** @devgu (Full-Stack + ML Integration)  
-> **Current Phase:** Next.js frontend → FastAPI backend migration + ML model integration
+> **Current Phase:** FastAPI backend active + Duplication v2 validated + Florence-2 plate OCR integrated
 
 ---
 
@@ -36,8 +36,9 @@ You are the sole developer building the **FastAPI backend** (Python) to serve ML
 | **Icons** | lucide-react | v0.576.0 |
 | **Notifications** | react-hot-toast | v2.4.1 |
 | **Fonts** | Google Fonts | Outfit (headings) + DM Sans (body) |
-| **Backend (Planned)** | FastAPI (Python) | For ML inference, duplication detection |
-| **ML Models (Planned)** | YOLO-based object detection | Pothole, manhole cover, garbage, fallen tree |
+| **Backend (Active)** | FastAPI (Python) | ML inference, duplication detection, traffic violations |
+| **ML Models (Active)** | YOLO-based detection + ResNet50 + SBERT | 7-class road hazard + 4-class traffic violation |
+| **OCR (Active)** | Florence-2-base (0.23B VLM) | Plate text extraction via <OCR> task, ~460MB, ~1.6s/plate CPU |
 | **Deployment** | TBD | Vercel (frontend), likely Railway/Render (FastAPI) |
 
 ---
@@ -222,21 +223,32 @@ You are the sole developer building the **FastAPI backend** (Python) to serve ML
 
 All models will output bounding boxes + confidence scores → stored in `DetectionResult.payload` (JSON).
 
-### 9.2 Duplication Detection System
-Concept imported from a prior project. Core idea:
-- When a new complaint is submitted with an image/location, compare it against existing complaints.
-- Use a combination of:
-  - **Geo-proximity** — complaints within X meters of each other.
-  - **Image similarity** — perceptual hashing or embedding-based similarity.
-  - **Time window** — prioritize recent complaints for duplication.
-- If a match exceeds the threshold → mark `isDuplicate = true`, set `originalReportId`.
-- Prevents flood reports for the same pothole/issue.
+### 9.2 Duplication Detection System (v2 — Active)
+Deterministic, weighted per-signal threshold architecture. XGBoost removed (circular training loop, never used in production).
 
-### 9.3 Traffic Violation Detection (Existing Schema, Pending ML)
-- Helmet violation detection
-- Triple riding detection
-- Wrong-side driving detection
-- Number plate detection/OCR
+| Signal | Model | Weight | Threshold |
+|---|---|---|---|
+| Image similarity | ResNet50 embeddings → cosine similarity | 0.25 | 0.85 (strong) |
+| Text similarity | SBERT (paraphrase-MiniLM-L6-v2) → cosine similarity | 0.40 | 0.80 (strong) |
+| Geo-proximity | Haversine distance (geopy) → location score | 0.35 | 100m gate |
+
+- **Combined score threshold:** 0.68 → `is_duplicate = true`
+- **Type gate:** Issue types must match before comparison
+- **Location gate:** Reports > 100m apart skip expensive embedding comparisons
+- **Image weight penalty:** Without images, max score = 0.75 (text + location only); requires very high text similarity AND close proximity to trigger duplicate
+- **Validated:** 100-report test suite → 100% pass rate (87/87 assessed), mean inference 12.7ms
+
+### 9.3 Traffic Violation Detection (Active)
+- Helmet / No Helmet detection (YOLO)
+- Triple riding detection (YOLO)
+- Wrong-side driving detection (YOLO)
+- Number plate detection (YOLO) + OCR text extraction
+  - **Active:** Florence-2-base VLM (`microsoft/Florence-2-base`, 0.23B params, ~460MB)
+  - Uses `<OCR>` task prompt on YOLO-cropped plate regions
+  - ~1.6s/plate on CPU (greedy decode, `use_cache=False` for torch 2.2.2 compat)
+  - Tested on Indian plates: 3/4 perfect reads, 1/4 partial (tiny crop)
+  - **Replaced:** EasyOCR (eliminated Rust/python-bidi build dependency)
+  - Module: `ml/plate_ocr.py` → called by `ml/traffic.py:read_plate_text()`
 
 ---
 
@@ -295,7 +307,10 @@ Concept imported from a prior project. Core idea:
 ### Short Term (Current Sprint)
 - [x] Build FastAPI backend with `/detect` endpoint (accepts image, returns detection results)
 - [x] Integrate YOLO models for pothole, manhole, garbage, fallen tree detection
-- [x] Implement duplication detection system (geo + image similarity)
+- [x] Implement duplication detection system v2 (deterministic, per-signal thresholds)
+- [x] Validate duplication engine with 100-report test suite (100% pass rate)
+- [x] Set up Python 3.12 venv with pinned compatible dependencies
+- [x] Migrate plate OCR from EasyOCR → Florence-2-base (validated on 4 Indian plate images)
 - [ ] Connect Next.js upload flow to FastAPI for real ML inference
 - [ ] Wire up the complaint submission modal to actually POST data to the backend
 
@@ -327,22 +342,47 @@ Concept imported from a prior project. Core idea:
 3. **Flexible `DetectionResult.payload`** — JSON field allows different model outputs without schema migrations.
 4. **Points-based leaderboard** — 10 pts per complaint + 5 pts per upvote incentivizes both reporting and community engagement.
 5. **Duplication as a first-class concept** — `isDuplicate` and `originalReportId` baked into the schema from day one.
+6. **Duplication v2: XGBoost removed** — Circular training loop (pseudo-labels from same formula) + in-memory store reset on restart = never used in production. Replaced with deterministic threshold system.
+7. **Image weight penalty by design** — Without images, max combined score = 0.75. Forces high text+location agreement for text-only deduplication, reducing false positives.
+8. **Dependency pinning** — `torch==2.2.2+cpu`, `numpy<2`, `transformers<5`, `sentence-transformers<4` to avoid ABI/API incompatibilities.
+9. **Florence-2 over fast-plate-ocr** — CCT-based ONNX models (fast-plate-ocr) achieved only 13% accuracy on Indian plates in testing. Florence-2-base VLM achieves 75%+ accuracy on the same test set. Speed trade-off (~1.6s vs ~17ms) is acceptable since plates are OCR'd only when YOLO detects them (0-3 per frame).
+10. **Florence-2 compat workarounds** — `attn_implementation="eager"` (no SDPA on torch 2.2.2) + `use_cache=False` (KV-cache crashes in remote modeling code). Greedy decode (`num_beams=1`) required.
 
 ---
 
 ## 14. Running the Project
 
+### Frontend (Next.js)
 ```bash
-# Install dependencies
 npm install
-
-# Generate Prisma client
 npx prisma generate
-
-# Run database migrations
 npx prisma migrate dev
-
-# Start development server
 npm run dev
 # → http://localhost:3000
 ```
+
+### Backend (FastAPI)
+```bash
+cd backend
+py -3.12 -m venv venv
+.\venv\Scripts\pip install --upgrade pip
+.\venv\Scripts\pip install -r requirements.txt
+# Fix known compatibility issues:
+.\venv\Scripts\pip install "numpy<2" "transformers<5" "sentence-transformers<4"
+.\venv\Scripts\pip install matplotlib ultralytics-thop starlette
+
+# Run backend:
+.\venv\Scripts\python -m uvicorn main:app --reload
+# → http://localhost:8000
+
+# Run duplication tests:
+$env:PYTHONIOENCODING='utf-8'
+.\venv\Scripts\python tests/test_duplication_100.py
+```
+
+### Dependency Compatibility Notes
+- **torch 2.2.2** requires `numpy<2` (compiled against numpy 1.x C ABI)
+- **transformers 5.x** requires `torch>=2.4`; pin `transformers<5`
+- **sentence-transformers 5.x** requires transformers 5; pin `sentence-transformers<4`
+- **opencv-python-headless** satisfies ultralytics' opencv requirement; ignore the pip warning
+- **python-bidi** pinned to `0.4.2` (>= 0.6 requires Rust/maturin build on Render)
