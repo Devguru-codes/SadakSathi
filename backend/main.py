@@ -82,20 +82,20 @@ async def lifespan(app: FastAPI):
         app.state.traffic_model = None
         logger.warning(f"⚠️  ML dependencies not installed ({e}). Traffic detection disabled.")
 
-    # ── 4. EasyOCR Reader (for number plate text extraction) ──
+    # ── 4. Florence-2 OCR Reader (for number plate text extraction) ──
     if settings.OCR_ENABLED:
         try:
             from ml.traffic import load_ocr_reader
 
-            ocr_reader = load_ocr_reader(languages=settings.OCR_LANGUAGES)
+            ocr_reader = load_ocr_reader()
             app.state.ocr_reader = ocr_reader
             if ocr_reader:
-                logger.info(f"✅ EasyOCR reader initialized (languages: {settings.OCR_LANGUAGES})")
+                logger.info(f"✅ Florence-2 OCR initialized")
             else:
-                logger.warning("⚠️  EasyOCR failed to initialize — number plate text will not be extracted.")
+                logger.warning("⚠️  Florence-2 OCR failed to initialize — number plate text will not be extracted.")
         except ImportError as e:
             app.state.ocr_reader = None
-            logger.warning(f"⚠️  EasyOCR not installed ({e}). OCR disabled.")
+            logger.warning(f"⚠️  Florence-2 OCR not installed ({e}). OCR disabled.")
     else:
         app.state.ocr_reader = None
         logger.info("ℹ️  OCR disabled via OCR_ENABLED=false.")

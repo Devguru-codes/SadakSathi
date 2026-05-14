@@ -6,6 +6,7 @@ const MOCK_BOXES = [
     { label: 'NO HELMET', confidence: 98, color: 'red', x: '10%', y: '20%', w: '25%', h: '35%' },
     { label: 'TRIPLE RIDING', confidence: 92, color: 'red', x: '40%', y: '35%', w: '30%', h: '40%' },
     { label: 'HELMET', confidence: 96, color: 'green', x: '75%', y: '25%', w: '20%', h: '30%' },
+    { label: 'NUMBER PLATE', confidence: 88, color: 'orange', x: '45%', y: '70%', w: '15%', h: '10%', plateText: 'MH 12 AB 1234' },
 ];
 
 interface TrafficPreviewProps {
@@ -68,10 +69,15 @@ export default function TrafficPreview({ frameNumber = 842, totalFrames = 1200 }
                             style={{ borderColor: box.color === 'red' ? '#ef4444' : '#22c55e' }}
                         />
                         <div
-                            className="absolute -top-6 left-0 px-2 py-0.5 text-[10px] font-bold text-white rounded flex items-center gap-1"
-                            style={{ backgroundColor: box.color === 'red' ? '#ef4444' : '#22c55e' }}
+                            className="absolute -top-6 left-0 px-2 py-0.5 text-[10px] font-bold text-white rounded flex flex-col gap-0.5 whitespace-nowrap"
+                            style={{ backgroundColor: box.color === 'red' ? '#ef4444' : box.color === 'orange' ? '#f97316' : '#22c55e' }}
                         >
-                            {box.label} ({box.confidence}%)
+                            <span className="flex items-center gap-1">{box.label} ({box.confidence}%)</span>
+                            {box.plateText && (
+                                <span className="bg-white/20 px-1 py-0.5 rounded text-[9px] tracking-wider font-mono">
+                                    {box.plateText}
+                                </span>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -104,10 +110,14 @@ export default function TrafficPreview({ frameNumber = 842, totalFrames = 1200 }
             </div>
 
             {/* Legend */}
-            <div className="px-6 pb-4 flex items-center gap-6">
+            <div className="px-6 pb-4 flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-2 text-xs text-text-secondary">
                     <div className="w-4 h-0.5 bg-red-500 rounded" />
                     <span>Violation Detected</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-text-secondary">
+                    <div className="w-4 h-0.5 bg-orange-500 rounded" />
+                    <span>Number Plate (OCR)</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-text-secondary">
                     <div className="w-4 h-0.5 bg-green-500 rounded" />
