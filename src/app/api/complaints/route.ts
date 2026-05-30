@@ -19,6 +19,21 @@ export async function POST(req: NextRequest) {
         }
 
         const userId = payload.id as string;
+
+        // Guard: verify the user actually exists in the DB.
+        // JWT may be valid but the user record could have been deleted
+        // or the DB reset after the token was issued.
+        const userExists = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+        if (!userExists) {
+            return NextResponse.json(
+                { message: 'Session expired — please log in again.' },
+                { status: 401 },
+            );
+        }
+
         const body = await req.json();
 
         const { issueType, description, street, city, state, zipcode, latitude, longitude, evidenceUrl, videoUrl } = body;
@@ -40,8 +55,8 @@ export async function POST(req: NextRequest) {
                 city,
                 state,
                 zipcode,
-                latitude:   latitude   ? parseFloat(latitude)   : null,
-                longitude:  longitude  ? parseFloat(longitude)  : null,
+                latitude:    latitude   ? parseFloat(latitude)   : null,
+                longitude:   longitude  ? parseFloat(longitude)  : null,
                 evidenceUrl: evidenceUrl ?? null,
                 videoUrl:    videoUrl   ?? null,
                 status: 'Submitted',
@@ -49,8 +64,6 @@ export async function POST(req: NextRequest) {
         });
 
         // ── Automatic duplicate detection ──────────────────────────────────
-        // Run geo-proximity check against recent complaints of the same type.
-        // This updates the DB record in-place if a duplicate is found.
         const parsedLat = latitude  ? parseFloat(latitude)  : null;
         const parsedLng = longitude ? parseFloat(longitude) : null;
 
@@ -76,9 +89,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                complaintId:  complaint.id,
-                isDuplicate:  !!duplicateOfId,
-                duplicateOf:  duplicateOfId ?? null,
+                complaintId: complaint.id,
+                isDuplicate: !!duplicateOfId,
+                duplicateOf: duplicateOfId ?? null,
             },
             { status: 201 },
         );

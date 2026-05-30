@@ -78,6 +78,11 @@ export default function TrafficPreview({ frameNumber = 842, totalFrames = 1200 }
                                     {box.plateText}
                                 </span>
                             )}
+                            {box.confidence > 70 && (
+                                <span className="flex items-center gap-1 bg-red-700 text-white px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider animate-pulse">
+                                    🚨 Traffic Alert High
+                                </span>
+                            )}
                         </div>
                     </div>
                 ))}

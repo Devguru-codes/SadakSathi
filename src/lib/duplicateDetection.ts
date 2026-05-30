@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 /** Maximum distance (in meters) to consider two complaints the same issue. */
-const DUPLICATE_RADIUS_METERS = 300;
+const DUPLICATE_RADIUS_METERS = 100;
 
 /** Only look at complaints submitted within this many days. */
 const DUPLICATE_WINDOW_DAYS = 30;

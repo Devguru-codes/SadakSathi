@@ -34,6 +34,20 @@ interface TrafficViolation {
     challan: { status: string; amount: number } | null;
 }
 
+interface TrafficComplaint {
+    id: string;
+    issueType: string;
+    description: string;
+    city: string;
+    state: string;
+    status: string;
+    createdAt: string;
+    submittedBy: string;
+    evidenceUrl: string | null;
+}
+
+const TRAFFIC_ISSUE_TYPES = ['No Helmet', 'Triple Riding', 'Wrong Side Driving', 'Signal Jumping'];
+
 function violationLabel(type: string): string {
     const map: Record<string, string> = {
         helmet_violation: 'No Helmet',
@@ -134,6 +148,7 @@ export default function TrafficDashboardPage() {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [violations, setViolations] = useState<TrafficViolation[]>([]);
     const [violationsLoading, setViolationsLoading] = useState(true);
+    const [trafficComplaints, setTrafficComplaints] = useState<TrafficComplaint[]>([]);
 
     // Auth check
     useEffect(() => {
@@ -168,24 +183,37 @@ export default function TrafficDashboardPage() {
         setShowLogoutConfirm(true);
     };
 
-    // Fetch analytics
+    // Fetch analytics + violations + traffic complaints
     useEffect(() => {
         const fetchAll = async () => {
+            // Fetch analytics (non-blocking for table)
             try {
                 const res = await fetch('/api/traffic/analytics');
                 if (res.ok) setAnalytics(await res.json());
             } catch { /* keep defaults */ }
 
-            // Fetch recent traffic violations from DB
-            try {
-                const res2 = await fetch('/api/traffic/detections');
-                if (res2.ok) {
-                    const data = await res2.json();
-                    setViolations(Array.isArray(data) ? data : []);
-                }
-            } catch { /* noop */ } finally {
-                setViolationsLoading(false);
+            // Fetch AI violations + citizen complaints in parallel
+            let aiViolations: TrafficViolation[] = [];
+            let citizenComplaints: TrafficComplaint[] = [];
+
+            const [violationsRes, complaintsRes] = await Promise.allSettled([
+                fetch('/api/traffic/detections'),
+                fetch('/api/traffic/complaints'),
+            ]);
+
+            if (violationsRes.status === 'fulfilled' && violationsRes.value.ok) {
+                const data = await violationsRes.value.json();
+                aiViolations = Array.isArray(data) ? data : [];
             }
+
+            if (complaintsRes.status === 'fulfilled' && complaintsRes.value.ok) {
+                const data = await complaintsRes.value.json();
+                citizenComplaints = Array.isArray(data) ? data : [];
+            }
+
+            setViolations(aiViolations);
+            setTrafficComplaints(citizenComplaints);
+            setViolationsLoading(false);
         };
         fetchAll();
     }, []);
@@ -264,8 +292,12 @@ export default function TrafficDashboardPage() {
                             <div className="bg-white rounded-2xl shadow-soft border border-border-light overflow-hidden mb-8">
                                 <div className="px-8 py-6 border-b border-border-light flex justify-between items-center">
                                     <div>
-                                        <h3 className="font-heading font-bold">Recent Traffic AI Detections</h3>
-                                        <p className="text-xs text-text-secondary mt-0.5">Traffic Violations — detected by AI enforcement engine</p>
+                                        <h3 className="font-heading font-bold">Recent Traffic Violations</h3>
+                                        <p className="text-xs text-text-secondary mt-0.5">
+                                            {violations.length > 0
+                                                ? 'AI enforcement engine detections'
+                                                : `Citizen-reported traffic complaints (${trafficComplaints.length} found)`}
+                                        </p>
                                     </div>
                                     <Link href="/Traffic/insights" className="text-sm font-bold text-brand-primary hover:underline">View Insights →</Link>
                                 </div>
@@ -274,12 +306,8 @@ export default function TrafficDashboardPage() {
                                     <div className="px-8 py-10 flex justify-center">
                                         <div className="animate-spin w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full" />
                                     </div>
-                                ) : violations.length === 0 ? (
-                                    <div className="px-8 py-16 text-center text-text-secondary">
-                                        <p className="mb-4">No traffic violations detected yet.</p>
-                                        <Link href="/upload" className="text-brand-primary font-bold hover:underline">Run Traffic Detection →</Link>
-                                    </div>
-                                ) : (
+                                ) : violations.length > 0 ? (
+                                    /* ── AI Violations from TrafficViolation table ── */
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-left">
                                             <thead>
@@ -303,9 +331,7 @@ export default function TrafficDashboardPage() {
                                                             {v.vehicle?.vehicleType ?? '—'}
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-100 text-purple-700">
-                                                                Traffic
-                                                            </span>
+                                                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-100 text-purple-700">Traffic AI</span>
                                                         </td>
                                                         <td className="px-6 py-4 text-sm font-bold text-text-primary">
                                                             {(v.confidence * 100).toFixed(1)}%
@@ -333,6 +359,57 @@ export default function TrafficDashboardPage() {
                                                 ))}
                                             </tbody>
                                         </table>
+                                    </div>
+                                ) : trafficComplaints.length > 0 ? (
+                                    /* ── Fallback: Citizen-reported traffic complaints ── */
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead>
+                                                <tr className="text-[10px] font-mono text-text-secondary uppercase bg-neutral-surface border-b border-border-light">
+                                                    <th className="px-6 py-4">Issue Type</th>
+                                                    <th className="px-6 py-4">Location</th>
+                                                    <th className="px-6 py-4">Source</th>
+                                                    <th className="px-6 py-4">Reported By</th>
+                                                    <th className="px-6 py-4">Status</th>
+                                                    <th className="px-6 py-4">Reported On</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border-light">
+                                                {trafficComplaints.slice(0, 10).map((c) => (
+                                                    <tr key={c.id} className="hover:bg-neutral-surface transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <span className="text-sm font-semibold text-text-primary">{c.issueType}</span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-text-secondary">
+                                                            {c.city}{c.state ? `, ${c.state}` : ''}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700">Citizen Report</span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-text-secondary">
+                                                            {c.submittedBy}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                                                                c.status === 'Completed' || c.status === 'ResolvedReviewed' ? 'bg-green-100 text-green-700' :
+                                                                c.status === 'Approved'  ? 'bg-blue-100 text-blue-700' :
+                                                                c.status === 'OnHold'    ? 'bg-orange-100 text-orange-700' :
+                                                                c.status === 'Rejected'  ? 'bg-red-100 text-red-700' :
+                                                                'bg-yellow-100 text-yellow-700'
+                                                            }`}>{c.status}</span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-text-secondary">
+                                                            {new Date(c.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="px-8 py-16 text-center text-text-secondary">
+                                        <p className="mb-4">No traffic violations or complaints found yet.</p>
+                                        <Link href="/upload" className="text-brand-primary font-bold hover:underline">Run Traffic Detection →</Link>
                                     </div>
                                 )}
                             </div>

@@ -85,6 +85,10 @@ function ComplaintsPageInner() {
   const [activeStatus, setActiveStatus] = useState("");
   const [sort, setSort]             = useState("newest");
 
+  // Real stats from DB (includes duplicates)
+  const [stats, setStats] = useState({ total: 0, pending: 0, inProgress: 0, resolved: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting]   = useState(false);
@@ -181,11 +185,15 @@ function ComplaintsPageInner() {
 
   useEffect(() => { fetchComplaints(); }, [fetchComplaints]);
 
-  // Compute stats from live data
-  const totalIssues  = complaints.length;
-  const pending      = complaints.filter(c => c.status === "Submitted").length;
-  const inProgress   = complaints.filter(c => c.status === "Approved" || c.status === "OnHold").length;
-  const resolved     = complaints.filter(c => c.status === "Completed" || c.status === "ResolvedReviewed").length;
+  // Fetch real stats from DB
+  useEffect(() => {
+    setStatsLoading(true);
+    fetch('/api/complaints/stats')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => setStats(data))
+      .catch(() => {/* keep defaults */})
+      .finally(() => setStatsLoading(false));
+  }, [complaints]); // refresh whenever feed reloads
 
   // GPS location
   const handleGetLocation = () => {
@@ -318,15 +326,15 @@ function ComplaintsPageInner() {
             {/* Live Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {[
-                { label: "Total Issues",  value: totalIssues,  color: "text-text-primary" },
-                { label: "Pending",       value: pending,      color: "text-yellow-500" },
-                { label: "In Progress",   value: inProgress,   color: "text-blue-500" },
-                { label: "Resolved",      value: resolved,     color: "text-green-500" },
+                { label: "Total Issues",  value: stats.total,       color: "text-text-primary" },
+                { label: "Pending",       value: stats.pending,     color: "text-yellow-500" },
+                { label: "In Progress",   value: stats.inProgress,  color: "text-blue-500" },
+                { label: "Resolved",      value: stats.resolved,    color: "text-green-500" },
               ].map(({ label, value, color }) => (
                 <div key={label} className="bg-white p-6 rounded-2xl border border-border-light shadow-soft">
                   <div className={`text-xs font-bold uppercase mb-2 ${color}`}>{label}</div>
-                  <div className={`text-3xl font-bold ${loading ? "opacity-30 animate-pulse" : ""}`}>
-                    {loading ? "—" : value.toLocaleString()}
+                  <div className={`text-3xl font-bold ${statsLoading ? "opacity-30 animate-pulse" : ""}`}>
+                    {statsLoading ? "—" : value.toLocaleString()}
                   </div>
                 </div>
               ))}
