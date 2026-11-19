@@ -35,6 +35,11 @@ export async function POST(req: Request) {
             const minutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60_000);
             return NextResponse.json({ message: `Too many wrong passwords. Try again in ${minutes} minute(s).` }, { status: 429 });
         }
+        if (user.lockedUntil) {
+            // The lock has expired: start counting again. Matching on the old lockedUntil means
+            // several requests arriving together reset it only once.
+            await prisma.user.updateMany({ where: { id: user.id, lockedUntil: user.lockedUntil }, data: { failedLogins: 0, lockedUntil: null } });
+        }
 
         // Google-only accounts have no password; answer exactly like a wrong password (no account hints).
         if (!user.passwordHash) {
@@ -49,9 +54,11 @@ export async function POST(req: Request) {
             data: { failedLogins: { increment: 1 } },
             select: { failedLogins: true },
         });
+        // Locking must NOT reset the counter: a request already past the lock check above would then
+        // count from 0 again and get a sixth password check (seen in CI with 12 parallel guesses).
         const lock = () => prisma.user.update({
             where: { id: user.id },
-            data: { failedLogins: 0, lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60_000) },
+            data: { lockedUntil: new Date(Date.now() + LOCK_MINUTES * 60_000) },
         });
         if (attempt > MAX_FAILED_LOGINS) {
             await lock();
